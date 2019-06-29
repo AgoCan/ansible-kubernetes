@@ -1,0 +1,5 @@
+dirs:
+  - /data/src
+  - /log/
+  - /ev-app/
+
