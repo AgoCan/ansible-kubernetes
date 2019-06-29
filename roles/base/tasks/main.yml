@@ -1,0 +1,4 @@
+- name: "epel_repo"
+  copy:
+    src: /root/1.txt
+    dest: /tmp/1.txt
