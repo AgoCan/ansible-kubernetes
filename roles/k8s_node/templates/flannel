@@ -1,0 +1,5 @@
+FLANNEL_ETCD="-etcd-endpoints=https://{{ host_ip }}:2379"
+FLANNEL_ETCD_KEY="-etcd-prefix=/kubernetes/network"
+FLANNEL_ETCD_CAFILE="--etcd-cafile=/etc/kubernetes/ssl/ca.pem"
+FLANNEL_ETCD_CERTFILE="--etcd-certfile=/etc/kubernetes/ssl/flanneld.pem"
+FLANNEL_ETCD_KEYFILE="--etcd-keyfile=/etc/kubernetes/ssl/flanneld-key.pem"
