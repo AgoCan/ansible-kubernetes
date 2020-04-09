@@ -23,7 +23,7 @@ install_docker(){
 download_binary(){
     docker pull $BINARY_IMAGE$1
     docker run -itd --name binary_image $BINARY_IMAGE$1 sh
-    docker cp binary_image:/hankbook-k8s-command /etc/ansible/fils
+    docker cp binary_image:/hankbook-k8s-command /etc/ansible/hank-book-files
     docker rm -f binary_image
 }
 

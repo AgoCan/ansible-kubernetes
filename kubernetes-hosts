@@ -1,0 +1,30 @@
+# 所有的机器都要配置，主要做些初始化的操作
+[all]
+192.168.126.71
+192.168.126.72
+192.168.126.73
+
+# 安装etcd,请配置成基数，比如3，5，7
+[etcd]
+192.168.126.71 NODE_NAME=etcd1
+192.168.126.72 NODE_NAME=etcd2
+192.168.126.73 NODE_NAME=etcd3
+
+# 只安装了kube-apiserver kube-scheduler kube-contraller
+[k8s_master]
+192.168.126.71
+
+# 安装kube-proxy, docker,kube-kubelet
+[k8s_node]
+192.168.126.71
+192.168.126.72
+192.168.126.73
+
+[all:vars]
+
+# 直接在这里判断是否有vip
+MASTER_IPMASTER_VIP=""
+
+bin_dir="/usr/local/bin"
+
+base_dir="/etc/ansible/hank-kubernetes"
