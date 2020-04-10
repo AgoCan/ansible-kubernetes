@@ -5,9 +5,9 @@ After=network.target
 [Service]
 Type=notify
 WorkingDirectory=/var/lib/etcd
-EnvironmentFile=-/etc/etcd/etcd.conf
+EnvironmentFile=-{{ ETCD_CONFIG }}/etcd.conf
 # set GOMAXPROCS to number of processors
-ExecStart=/bin/bash -c "GOMAXPROCS=$(nproc) /usr/local/bin/etcd"
+ExecStart=/bin/bash -c "GOMAXPROCS=$(nproc) {{ bin_dir }}/etcd"
 
 [Install]
 WantedBy=multi-user.target

@@ -1,4 +1,71 @@
-- name: "epel_repo"
-  copy:
-    src: /root/1.txt
-    dest: /tmp/1.txt
+- name: prepare some dirs
+  file: name={{ item }} state=directory
+  with_items:
+  - "{{ bin_dir }}"
+  - "{{ ca_dir }}"
+  - "/var/log/kubernetes/"    # etcd 工作目录
+  - "/etc/etcd/"
+
+- name: 下载 kube-master 二进制
+  copy: src={{ local_bin_dir }}/{{ item }} dest={{ bin_dir }}/{{ item }} mode=0755
+  with_items:
+  - kube-apiserver
+  - kube-controller-manager
+  - kube-scheduler
+  - kubectl
+  tags: upgrade_k8s
+
+#
+- name: 分发证书相关
+  copy: src={{ base_dir }}/ssl/{{ item }} dest={{ ca_dir }}/{{ item }}
+  with_items:
+  - ca.pem
+  - ca-key.pem
+  - ca-config.json
+  - kubernetes-key.pem
+  - kubernetes.pem
+  - kube-proxy-key.pem 
+  - kube-proxy.pem
+  - etcd-key.pem
+  - etcd.pem
+  - bootstrap-token.csv
+
+- name: 创建 master 服务的 systemd unit 文件
+  template: src={{ item }}.j2 dest=/etc/systemd/system/{{ item }}
+  with_items:
+  - kube-apiserver.service
+  - kube-controller-manager.service
+  - kube-scheduler.service
+  tags: restart_master, upgrade_k8s
+#
+- name: enable master 服务
+  shell: systemctl enable kube-apiserver kube-controller-manager kube-scheduler
+  ignore_errors: true
+
+- name: 启动 master 服务
+  shell: "systemctl daemon-reload && systemctl restart kube-apiserver && \
+	systemctl restart kube-controller-manager && systemctl restart kube-scheduler"
+  tags: upgrade_k8s, restart_master
+
+- name: 生成 .kube/config 文件
+  shell: "kubectl config set-cluster kubernetes \
+  --certificate-authority={{ ca_dir }}/ca.pem \
+  --embed-certs=true \
+  --server={{ inventory_hostname }} && \
+  kubectl config set-credentials admin \
+  --client-certificate={{ ca_dir }}/admin.pem \
+  --embed-certs=true \
+  --client-key={{ ca_dir }}/admin-key.pem && \
+  kubectl config set-context kubernetes \
+  --cluster=kubernetes \
+  --user=admin && \
+  kubectl config use-context kubernetes"
+
+- name: 以轮询的方式等待master服务启动完成
+  command: "{{ bin_dir }}/kubectl get node"
+  register: result
+  until:    result.rc == 0
+  retries:  5
+  delay: 6
+  tags: upgrade_k8s, restart_master
+  

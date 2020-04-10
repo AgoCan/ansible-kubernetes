@@ -24,10 +24,11 @@
   - etcd.pem
 
 - name: copy etcd.service
-  copy: src=etcd.service dest=/usr/lib/systemd/system/etcd.service
+  template: src=etcd.service.j2 dest=/usr/lib/systemd/system/etcd.service
+  tags: upgrade_etcd
 
 - name: 创建etcd配置文件
-  template: src=etcd.conf.j2 dest=/etc/etcd/etcd.conf
+  template: src=etcd.conf.j2 dest={{ ETCD_CONFIG }}/etcd.conf
   tags: upgrade_etcd
 
 #
