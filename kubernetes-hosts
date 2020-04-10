@@ -30,3 +30,7 @@ bin_dir="/usr/local/bin"
 base_dir="/etc/ansible/hank-kubernetes"
 
 kubernetes_config_dir="/etc/kubernetes/"
+
+ca_dir="/etc/kubernetes/ssl"
+
+local_bin_dir="/etc/ansible/hank-kubernetes/bin"
