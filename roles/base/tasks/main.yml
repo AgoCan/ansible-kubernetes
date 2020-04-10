@@ -88,7 +88,8 @@
   copy: src=ipvs.modules dest=/etc/sysconfig/modules/ipvs.modules mode=0755
 
 - name: 加载
-  shell: bash /etc/sysconfig/modules/ipvs.modules && lsmod | grep -e ip_vs -e nf_conntrack_ipv4
+  shell: bash /etc/sysconfig/modules/ipvs.modules
+  
 - name: 关闭防火墙
   service:
     name: firewalld
