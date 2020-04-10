@@ -4,9 +4,10 @@
   - "{{ bin_dir }}"
   - "{{ base_dir }}"
   - "{{ base_dir }}/ssl"
+  - "{{ base_dir }}/bin"
 
 - name: 创建cfssl命令
-  copy: src={{ item }} dest={{ bin_dir }}/{{ item }} mode=0755
+  copy: src={{ base_dir }}/bin/{{ item }} dest={{ bin_dir }}/{{ item }} mode=0755
   with_items:
   - cfssl
   - cfssljson
@@ -22,10 +23,11 @@
   {{ bin_dir }}/cfssl gencert -initca ca-csr.json | {{ bin_dir }}/cfssljson -bare ca" 
 
 - name: 准备 etcd 证书签名请求
-  template: src=etcd-scr.json.j2 dest={{ base_dir }}/ssl/etcd-scr.json
+  template: src=etcd-csr.json.j2 dest={{ base_dir }}/ssl/etcd-csr.json
 
 - name: 生成 etcd 证书
   shell: "cd {{ base_dir }}/ssl && \
+  {{ bin_dir }}/cfssl \
   gencert -ca={{ base_dir }}/ssl/ca.pem \
   -ca-key={{ base_dir }}/ssl/ca-key.pem \
   -config={{ base_dir }}/ssl/ca-config.json \
@@ -37,16 +39,18 @@
 # cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes kubernetes-csr.json | cfssljson -bare kubernetes
 - name: 生成 kubernetes 证书
   shell: "cd {{ base_dir }}/ssl && \
+  {{ bin_dir }}/cfssl \
   gencert -ca={{ base_dir }}/ssl/ca.pem \
   -ca-key={{ base_dir }}/ssl/ca-key.pem \
   -config={{ base_dir }}/ssl/ca-config.json \
   -profile=kubernetes kubernetes-csr.json | {{ bin_dir }}/cfssljson -bare kubernetes"
 
 - name: 准备 admin 证书签名请求
-  template: src=admin-csr.json.j2 dest={{ base_dir }}/ssl/amin-csr.json
+  template: src=admin-csr.json.j2 dest={{ base_dir }}/ssl/admin-csr.json
 
 - name: 生成 admin 证书
   shell: "cd {{ base_dir }}/ssl && \
+  {{ bin_dir }}/cfssl \
   gencert -ca={{ base_dir }}/ssl/ca.pem \
   -ca-key={{ base_dir }}/ssl/ca-key.pem \
   -config={{ base_dir }}/ssl/ca-config.json \
@@ -57,6 +61,7 @@
 
 - name: 生成 proxy 证书
   shell: "cd {{ base_dir }}/ssl && \
+  {{ bin_dir }}/cfssl \
   gencert -ca={{ base_dir }}/ssl/ca.pem \
   -ca-key={{ base_dir }}/ssl/ca-key.pem \
   -config={{ base_dir }}/ssl/ca-config.json \

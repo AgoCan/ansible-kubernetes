@@ -1,6 +1,9 @@
 #!/bin/bash
 
+# 镜像请加上冒号
 BINARY_IMAGE="hank997/kubernetes-deploy:"
+
+BIN_DIR="/etc/ansible/hank-kubernetes/bin"
 
 install_docker(){
     wget -O /etc/yum.repos.d/docker-ce.repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
@@ -21,9 +24,10 @@ install_docker(){
 }
 
 download_binary(){
+    mkdir -p $BIN_DIR
     docker pull $BINARY_IMAGE$1
     docker run -itd --name binary_image $BINARY_IMAGE$1 sh
-    docker cp binary_image:/hankbook-k8s-command /etc/ansible/hank-book-files
+    docker cp binary_image:/hankbook-k8s-command $BIN_DIR
     docker rm -f binary_image
 }
 

@@ -2,9 +2,7 @@
   "CN": "kubernetes",
   "hosts": [
     "127.0.0.1",
-  {% MASTER_IPMASTER_VIP != "" %}
-    "{{ MASTER_IPMASTER_VIP }}",
-  {% endif %}
+    "{{ MASTER_VIP }}",
   {% for host in groups['k8s_master'] %}
     "{{ host }}",
   {% endfor %}
