@@ -28,3 +28,5 @@ MASTER_VIP="hank-book.cn"
 bin_dir="/usr/local/bin"
 
 base_dir="/etc/ansible/hank-kubernetes"
+
+kubernetes_config_dir="/etc/kubernetes/"

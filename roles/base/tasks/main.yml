@@ -1,4 +1,113 @@
-- name: "epel_repo"
-  copy:
-    src: /root/1.txt
-    dest: /tmp/1.txt
+- name: 安装基础软件包
+  yum: 
+    name: 
+      - bash-completion     # bash命令补全工具，需要重新登录服务器生效
+      - conntrack-tools     # ipvs 模式需要
+      - ipset               # ipvs 模式需要
+      - ipvsadm             # ipvs 模式需要
+      - libseccomp          # 安装containerd需要
+      - nfs-utils           # 挂载nfs 共享文件需要 (创建基于 nfs的PV 需要)
+      - psmisc              # 安装psmisc 才能使用命令killall，keepalive的监测脚本需要
+      - rsync               # 文件同步工具，分发证书等配置文件需要
+      - socat               # 用于port forwarding
+      - epel-release
+      - conntrack-tools
+      - ntpdate
+      - wget
+    state: present
+
+- name: 临时关闭 selinux
+  shell: "setenforce 0"
+  failed_when: false
+  
+- name: 永久关闭 selinux
+  lineinfile:
+    dest: /etc/selinux/config
+    regexp: "^SELINUX="
+    line: "SELINUX=disabled"
+
+# 优化设置 journal 日志相关，避免日志重复搜集，浪费系统资源
+- name: 禁止rsyslog获取journald日志1
+  lineinfile:
+    dest: /etc/rsyslog.conf
+    state: present
+    regexp: 'ModLoad imjournal'
+    line: '#$ModLoad imjournal # provides access to the systemd journal'
+
+
+- name: 禁止rsyslog获取journald日志2
+  lineinfile:
+    dest: /etc/rsyslog.conf
+    state: present
+    regexp: 'IMJournalStateFile'
+    line: '#$IMJournalStateFile imjournal.state'
+
+- name: 重启rsyslog服务
+  service: name=rsyslog state=restarted
+
+# 禁用系统swap
+- name: 禁用系统 swap
+  shell: "swapoff -a && sysctl -w vm.swappiness=0"
+  ignore_errors: true
+
+#
+- name: 删除fstab swap 相关配置
+  lineinfile:
+    path: /etc/fstab
+    regexp: 'swap'
+    state: absent
+    backup: 'yes'
+# 
+- name: 转换内核版本为浮点数
+  set_fact:
+     KERNEL_VER: "{{ ansible_kernel.split('-')[0].split('.')[0]|int + ansible_kernel.split('-')[0].split('.')[1]|int/100 }}"
+#
+- name: 设置 nf_conntrack 模块名
+  set_fact: NF_CONNTRACK="nf_conntrack"
+  when: "KERNEL_VER|float >= 4.19"
+#
+- name: 设置 nf_conntrack_ipv4 模块名
+  set_fact: NF_CONNTRACK="nf_conntrack_ipv4"
+  when: "KERNEL_VER|float < 4.19"
+# 
+- name: 加载内核模块
+  modprobe: name={{ item }} state=present
+  with_items:
+    - br_netfilter
+    - ip_vs
+    - ip_vs_rr
+    - ip_vs_wrr
+    - ip_vs_sh
+    - "{{ NF_CONNTRACK }}"
+  ignore_errors: true
+# 
+- name: 启用systemd自动加载模块服务
+  service: name=systemd-modules-load enabled=yes
+
+- name: 增加内核模块开机加载配置
+  template: src=10-k8s-modules.conf.j2 dest=/etc/modules-load.d/10-k8s-modules.conf
+#
+- name: 关闭防火墙
+  service:
+    name: firewalld
+    state: stopped
+    enabled: no
+
+#
+- name: 修改文件描述符
+  copy: src=limits.conf dest=/etc/security/limits.conf mode=0644
+
+# 
+- name: 设置系统参数
+  copy: src=hank-sysctl.conf dest=/etc/sysctl.d/hank-sysctl.conf mode=0644
+#
+- name: 生效系统参数
+  shell: "sysctl -p /etc/sysctl.d/hank-sysctl.conf"
+  ignore_errors: true
+#
+# 设置系统 ulimits
+- name: 创建 systemd 配置目录
+  file: name=/etc/systemd/system.conf.d state=directory  
+
+- name: 设置系统 ulimits
+  copy: src=hank-ulimits.conf dest=/etc/systemd/system.conf.d/hank-ulimits.conf
