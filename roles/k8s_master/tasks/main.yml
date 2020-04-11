@@ -5,6 +5,7 @@
   - "{{ ca_dir }}"
   - "/var/log/kubernetes/"    # etcd 工作目录
   - "/etc/etcd/"
+  - "{{ manifests_dir }}"
 
 - name: 下载 kube-master 二进制
   copy: src={{ local_bin_dir }}/{{ item }} dest={{ bin_dir }}/{{ item }} mode=0755
@@ -29,6 +30,8 @@
   - etcd-key.pem
   - etcd.pem
   - bootstrap-token.csv
+  - admin.pem
+  - admin-key.pem
 
 - name: 创建 master 服务的 systemd unit 文件
   template: src={{ item }}.j2 dest=/etc/systemd/system/{{ item }}
@@ -51,7 +54,7 @@
   shell: "kubectl config set-cluster kubernetes \
   --certificate-authority={{ ca_dir }}/ca.pem \
   --embed-certs=true \
-  --server={{ inventory_hostname }} && \
+  --server=https://{{ inventory_hostname }}:6443 && \
   kubectl config set-credentials admin \
   --client-certificate={{ ca_dir }}/admin.pem \
   --embed-certs=true \
@@ -68,4 +71,11 @@
   retries:  5
   delay: 6
   tags: upgrade_k8s, restart_master
-  
+
+- name: 创建 kubelet-bootstrap.yaml
+  copy: src=kubelet-bootstrap.yaml dest={{ manifests_dir }}/kubelet-bootstrap.yaml
+
+- name: 生成 kubelet-bootstrap
+  copy: {{ bin_dir }}/kubectl apply -f {{ manifests_dir }}/kubelet-bootstrap.yaml
+  run_once: true
+  tags: restart_master

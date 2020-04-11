@@ -23,7 +23,8 @@
 [all:vars]
 
 # 直接在这里判断是否有vip, if 语法有误，暂无找到错误点在哪
-MASTER_VIP="hank-book.cn"
+master_vip_choice="no"
+master_vip="hank-book.cn"
 
 bin_dir="/usr/local/bin"
 
@@ -38,3 +39,7 @@ local_bin_dir="/etc/ansible/hank-kubernetes/bin"
 service_cluster_ip="10.96.0.0/16"
 service_node_port_range="30000-32767"
 cluster_cidr="10.2.0.0/16"
+
+manifests_dir="/etc/kubernetes/manifests"
+
+coredns_ip="10.96.0.2"

@@ -1,4 +1,104 @@
-- name: "epel_repo"
-  copy:
-    src: /root/1.txt
-    dest: /tmp/1.txt
+- name: 分发docker 阿里云源
+  copy: src=docker-ce.repo dest=/etc/yum.repos.d/docker-ce.repo
+
+- name: 安装docker-ce
+  yum: 
+    name:
+      - docker-ce
+
+- name: 打开docker，并开机自起
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: 创建kube-node 相关目录
+  file: name={{ item }} state=directory
+  with_items:
+  - /var/lib/kubelet
+  - /var/lib/kube-proxy
+  - /etc/cni/net.d
+
+- name: 下载 kubelet,kube-proxy 二进制和基础 cni plugins
+  copy: src={{ local_bin_dir }}/{{ item }} dest={{ bin_dir }}/{{ item }} mode=0755
+  with_items:
+  - kubectl
+  - kubelet
+  - kube-proxy
+  tags: restart_master, upgrade_k8s
+
+- name: 分发证书相关
+  copy: src={{ base_dir }}/ssl/{{ item }} dest={{ ca_dir }}/{{ item }}
+  with_items:
+    - ca.pem
+    - bootstrap-token.csv
+#
+- name: 生成 bootstrap.kubeconfig 文件
+  shell: "cd {{ kubernetes_config_dir }} && \
+  {{ bin_dir }}/usr/local/bin/kubectl config set-cluster kubernetes \
+  --certificate-authority={{ ca_dir }}/ca.pem \
+  --embed-certs=true \
+  --server=https://{{ SERVER_IP }}:6443 \
+  --kubeconfig=bootstrap.kubeconfig && \
+  export TOKEN=$(awk -F ',' '{print $1}' {{ ca_dir }}/bootstrap-token.csv) && \
+  {{ bin_dir }}/kubectl config set-credentials kubelet-bootstrap \
+  --token=${TOKEN} \
+  --kubeconfig=bootstrap.kubeconfig && \
+  {{ bin_dir }}/kubectl config set-context default \
+  --cluster=kubernetes \
+  --user=kubelet-bootstrap \
+  --kubeconfig=bootstrap.kubeconfig && \
+  {{ bin_dir }}/kubectl config use-context default --kubeconfig=bootstrap.kubeconfig "
+  tags: restart_master, upgrade_k8s
+
+- name: 生成 kube-proxy.kubeconfig
+  shell: "cd {{ kubernetes_config_dir }} && \
+  {{ bin_dir }}/kubectl config set-cluster kubernetes \
+  --certificate-authority={{ ca_dir }}/ca.pem \
+  --embed-certs=true \
+  --server=https://{{ SERVER_IP }}:6443 \
+  --kubeconfig=kube-proxy.kubeconfig && \
+  {{ bin_dir }}/kubectl  config set-credentials kube-proxy \
+  --client-certificate={{ ca_dir }}/kube-proxy.pem \
+  --client-key={{ ca_dir }}/kube-proxy-key.pem \
+  --embed-certs=true \
+  --kubeconfig=kube-proxy.kubeconfig && \
+  {{ bin_dir }}/kubectl  config set-context default \
+  --cluster=kubernetes \
+  --user=kube-proxy \
+  --kubeconfig=kube-proxy.kubeconfig && \
+  # 设置默认上下文
+  {{ bin_dir }}/kubectl  config use-context default --kubeconfig=kube-proxy.kubeconfig"
+  tags: restart_master, upgrade_k8s
+
+- name: 创建 master 服务的 systemd unit 文件
+  template: src={{ item }}.j2 dest=/etc/systemd/system/{{ item }}
+  with_items:
+  - kube-proxy.service
+  - kubelet.service
+  tags: restart_master, upgrade_k8s
+
+- name: 开机启用kubelet 服务
+  shell: systemctl enable kubelet
+  ignore_errors: true
+
+- name: 开启kubelet 服务
+  shell: systemctl daemon-reload && systemctl restart kubelet
+  tags: upgrade_k8s, restart_node
+
+- name: 开机启用kube-proxy 服务
+  shell: systemctl enable kube-proxy
+  ignore_errors: true
+
+- name: 开启kube-proxy 服务
+  shell: systemctl daemon-reload && systemctl restart kube-proxy
+  tags: reload-kube-proxy, upgrade_k8s, restart_node
+
+# 轮询等待kubelet启动完成
+- name: 轮询等待kubelet启动
+  shell: "systemctl status kubelet.service|grep Active"
+  register: kubelet_status
+  until: '"running" in kubelet_status.stdout'
+  retries: 8
+  delay: 2
+  tags: reload-kube-proxy, upgrade_k8s, restart_node

@@ -1,0 +1,28 @@
+[Unit]
+Description=Kubernetes Kubelet
+Documentation=https://github.com/GoogleCloudPlatform/kubernetes
+After=docker.service
+Requires=docker.service
+
+[Service]
+WorkingDirectory=/var/lib/kubelet
+ExecStart={{ bin_dir }}/kubelet  \
+    --hostname-override={{ inventory_hostname }}   \
+    --pod-infra-container-image=mirrorgooglecontainers/pause-amd64:3.1   \
+    --bootstrap-kubeconfig={{ kubernetes_config_dir }}/bootstrap.kubeconfig   \
+    --kubeconfig={{ kubernetes_config_dir }}/kubelet.kubeconfig   \
+    --cert-dir={{ ca_dir }}  \
+    --network-plugin=cni   \
+    --cni-conf-dir=/etc/cni/net.d   \
+    --cni-bin-dir={{ bin_dir }}/cni   \
+    --cluster-dns={{ coredns_ip }}   \
+    --cluster-domain=cluster.local.   \
+    --hairpin-mode hairpin-veth   \
+    --fail-swap-on=false   \
+    --logtostderr=true   \
+    --v=2   \
+    --logtostderr=false   \
+    --log-dir=/var/log/kubernetes   \
+    --feature-gates=DevicePlugins=true
+Restart=on-failure
+RestartSec=5
