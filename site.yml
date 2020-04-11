@@ -13,3 +13,20 @@
 - hosts: k8s_node
   roles:
     - k8s_node
+
+- hosts: k8s_master
+  tasks:
+  - name: agree
+    shell: "{{ bin_dir }}/kubectl get csr|grep 'Pending' | awk 'NR>0{print $1}'| xargs {{ bin_dir }}/kubectl certificate approve"
+    delay: 2
+    retries: 2
+    ignore_errors: true
+
+  - name: 轮询等待所有node加入
+    shell: "{{ bin_dir }}/kubectl get node {{ item }}"
+    register: node_status
+    until: '"{{ item }}" in node_status.stdout'
+    retries: 8
+    delay: 2
+    tags: reload-kube-proxy, upgrade_k8s, restart_node
+    with_items: "{{ groups['k8s_node'] }}"
