@@ -43,3 +43,6 @@ cluster_cidr="10.2.0.0/16"
 manifests_dir="/etc/kubernetes/manifests"
 
 coredns_ip="10.96.0.2"
+
+dashboard_port="30001"
+

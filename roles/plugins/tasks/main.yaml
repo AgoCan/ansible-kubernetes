@@ -1,0 +1,30 @@
+- name: 分发yaml文件
+  template: src={{ item }}.j2 dest={{ manifests_dir }}/{{ item }}
+  with_items:
+    - calico.yaml
+    - coredns.yaml
+    - dashboard.yaml
+
+- name: 创建calico
+  shell: "{{ bin_dir }}/kubectl apply -f {{ manifests_dir }}/calico.yaml"
+  run_once: true
+  tags: restart_master
+
+- name: 创建coredns
+  shell: "{{ bin_dir }}/kubectl apply -f {{ manifests_dir }}/coredns.yaml"
+  run_once: true
+  tags: restart_master
+
+- name: 分发admin_token
+  copy: src=dashboard_token.yaml dest={{ manifests_dir }}/dashboard_token.yaml
+  tags: restart_master
+
+- name: 创建dashboard_token
+  shell: "{{ bin_dir }}/kubectl apply -f {{ manifests_dir }}/dashboard_token.yaml"
+  run_once: true
+  tags: restart_master
+
+- name: 创建dashboard
+  shell: "{{ bin_dir }}/kubectl apply -f {{ manifests_dir }}/dashboard.yaml"
+  run_once: true
+  tags: restart_master

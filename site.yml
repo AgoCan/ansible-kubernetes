@@ -30,3 +30,7 @@
     delay: 2
     tags: reload-kube-proxy, upgrade_k8s, restart_node
     with_items: "{{ groups['k8s_node'] }}"
+
+- hosts: k8s_master
+  roles:
+    - plugins
