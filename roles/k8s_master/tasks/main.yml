@@ -76,6 +76,6 @@
   copy: src=kubelet-bootstrap.yaml dest={{ manifests_dir }}/kubelet-bootstrap.yaml
 
 - name: 生成 kubelet-bootstrap
-  copy: {{ bin_dir }}/kubectl apply -f {{ manifests_dir }}/kubelet-bootstrap.yaml
+  shell: "{{ bin_dir }}/kubectl apply -f {{ manifests_dir }}/kubelet-bootstrap.yaml"
   run_once: true
   tags: restart_master

@@ -32,10 +32,12 @@
   with_items:
     - ca.pem
     - bootstrap-token.csv
+    - kube-proxy.pem
+    - kube-proxy-key.pem
 #
 - name: 生成 bootstrap.kubeconfig 文件
   shell: "cd {{ kubernetes_config_dir }} && \
-  {{ bin_dir }}/usr/local/bin/kubectl config set-cluster kubernetes \
+  {{ bin_dir }}/kubectl config set-cluster kubernetes \
   --certificate-authority={{ ca_dir }}/ca.pem \
   --embed-certs=true \
   --server=https://{{ SERVER_IP }}:6443 \
@@ -67,7 +69,6 @@
   --cluster=kubernetes \
   --user=kube-proxy \
   --kubeconfig=kube-proxy.kubeconfig && \
-  # 设置默认上下文
   {{ bin_dir }}/kubectl  config use-context default --kubeconfig=kube-proxy.kubeconfig"
   tags: restart_master, upgrade_k8s
 
@@ -78,21 +79,14 @@
   - kubelet.service
   tags: restart_master, upgrade_k8s
 
-- name: 开机启用kubelet 服务
-  shell: systemctl enable kubelet
-  ignore_errors: true
+- name: 重载 service 服务
+  shell: systemctl daemon-reload
+  
+- name: 打开kube-proxy，并开机自起
+  shell: "systemctl enable kube-proxy && systemctl restart kube-proxy"
 
-- name: 开启kubelet 服务
-  shell: systemctl daemon-reload && systemctl restart kubelet
-  tags: upgrade_k8s, restart_node
-
-- name: 开机启用kube-proxy 服务
-  shell: systemctl enable kube-proxy
-  ignore_errors: true
-
-- name: 开启kube-proxy 服务
-  shell: systemctl daemon-reload && systemctl restart kube-proxy
-  tags: reload-kube-proxy, upgrade_k8s, restart_node
+- name: 打开kube-proxy，并开机自起
+  shell: "systemctl enable kubelet && systemctl restart kubelet"
 
 # 轮询等待kubelet启动完成
 - name: 轮询等待kubelet启动
