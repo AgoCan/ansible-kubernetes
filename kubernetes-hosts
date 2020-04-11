@@ -37,6 +37,8 @@ ca_dir="/etc/kubernetes/ssl"
 local_bin_dir="/etc/ansible/hank-kubernetes/bin"
 
 service_cluster_ip="10.96.0.0/16"
+apiserver_service_ip="10.96.0.1"
+
 service_node_port_range="30000-32767"
 cluster_cidr="10.2.0.0/16"
 

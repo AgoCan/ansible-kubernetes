@@ -6,7 +6,7 @@
   {% for host in groups['k8s_master'] %}
     "{{ host }}",
   {% endfor %}
-    "10.1.0.1",
+    "{{ apiserver_service_ip }}",
     "kubernetes",
     "kubernetes.default",
     "kubernetes.default.svc",
