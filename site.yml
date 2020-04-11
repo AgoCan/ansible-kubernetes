@@ -6,6 +6,9 @@
   roles: 
     - base
 
+- hosts: etcd
+  roles:
+    - etcd
 - hosts: k8s_master
   roles:
     - k8s_master

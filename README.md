@@ -20,10 +20,10 @@ done
 
 ```bash
 # 文档中脚本默认均以root用户执行
-yum update
+#yum update
 yum install epel-release -y
 # 安装ansible
-yum install ansible-2.9.6-1.el7 -y
+yum install ansible-2.9.6-1.el7 git -y
 ```
 
 3. 配置ansible的配置文件
