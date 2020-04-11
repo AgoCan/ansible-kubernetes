@@ -1,3 +1,4 @@
+
 - name: prepare some dirs
   file: name={{ item }} state=directory
   with_items:
@@ -70,5 +71,5 @@
 - name: 生成 bootstrap-token
   shell: "cd {{ base_dir }}/ssl && \
           export BOOTSTRAP_TOKEN=$(head -c 16 /dev/urandom | od -An -t x | tr -d ' ') &&\
-          echo ${BOOTSTRAP_TOKEN},kubelet-bootstrap,10001,"system:kubelet-bootstrap" >> bootstrap-token.csv
+          echo ${BOOTSTRAP_TOKEN},kubelet-bootstrap,10001,'system:kubelet-bootstrap' >> bootstrap-token.csv"
 
