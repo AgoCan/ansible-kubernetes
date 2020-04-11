@@ -91,7 +91,7 @@
 # 轮询等待kubelet启动完成
 - name: 轮询等待kubelet启动
   shell: "systemctl status kubelet.service|grep Active"
-  register: node_status
+  register: kubelet_status
   until: '"running" in kubelet_status.stdout'
   retries: 8
   delay: 2
