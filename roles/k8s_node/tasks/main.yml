@@ -16,7 +16,7 @@
   yum: 
     name:
       - nfs-utils
-    when: "groups['nfs']|length > 0"
+  when: "groups['nfs']|length > 0"
 
 - name: 创建kube-node 相关目录
   file: name={{ item }} state=directory
