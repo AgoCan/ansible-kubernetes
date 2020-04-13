@@ -14,10 +14,7 @@
 - hosts: k8s_master
   roles:
     - k8s_master
-    {% if master_vip_choice == 'yes' %}
-    - keepalived
-    {% endif %}
-
+    - { role: keepalived, when: "master_vip_choice == 'yes'" }
 - hosts: k8s_node
   roles:
     - k8s_node

@@ -14,12 +14,12 @@
   tags: restart_lb
 
 - name: 配置 keepalived 主节点
-  templates: src=keepalived.master.conf.j2 dest=/etc/keepalived/keepalived.conf
+  template: src=keepalived.master.conf.j2 dest=/etc/keepalived/keepalived.conf
   when: "{{ inventory_hostname }}" == "{{ groups['k8s_master'][0] }}"
   tags: restart_lb
 
 - name: 配置 keepalived 从节点
-  templates: src=keepalived.backup.conf.j2 dest=/etc/keepalived/keepalived.conf
+  template: src=keepalived.backup.conf.j2 dest=/etc/keepalived/keepalived.conf
   when: "{{ inventory_hostname }}" != "{{ groups['k8s_master'][0] }}"
   tags: restart_lb
 
