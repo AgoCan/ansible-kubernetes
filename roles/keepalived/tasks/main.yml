@@ -14,13 +14,17 @@
   tags: restart_lb
 
 - name: 配置 keepalived 主节点
-  template: src=keepalived.master.conf.j2 dest=/etc/keepalived/keepalived.conf
-  when: "{{ inventory_hostname }}" == "{{ groups['k8s_master'][0] }}"
+  template: 
+    src: keepalived.master.conf.j2
+    dest: /etc/keepalived/keepalived.conf
+  when: "inventory_hostname  ==  groups['k8s_master'][0]"
   tags: restart_lb
 
 - name: 配置 keepalived 从节点
-  template: src=keepalived.backup.conf.j2 dest=/etc/keepalived/keepalived.conf
-  when: "{{ inventory_hostname }}" != "{{ groups['k8s_master'][0] }}"
+  template:
+    src: keepalived.backup.conf.j2
+    dest: /etc/keepalived/keepalived.conf
+  when: "inventory_hostname  !=  groups['k8s_master'][0]"
   tags: restart_lb
 
 - name: 启动keepalived，并设置开机自起
