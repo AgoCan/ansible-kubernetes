@@ -24,11 +24,21 @@ install_docker(){
 }
 
 download_binary(){
-    mkdir -p $BIN_DIR
-    docker pull $BINARY_IMAGE$1
-    docker run -itd --name binary_image $BINARY_IMAGE$1 sh
-    docker cp binary_image:/hankbook-k8s-command $BIN_DIR
-    docker rm -f binary_image
+    mkdir -p $BIN_DIR && \
+    docker pull $BINARY_IMAGE$1 && \
+    docker run -itd --name k8s_binary_image $BINARY_IMAGE$1 sh && \
+    docker cp k8s_binary_image:/hank-kubernetes $BIN_DIR && \
+    docker rm -f k8s_binary_image || \
+    exit 1
+}
+
+install_ansible_git(){
+    yum install epel-release -y
+    # 安装ansible
+    yum install ansible-2.9.6-1.el7 git -y
+    cd /etc/ansible/
+    git clone https://github.com/AgoCan/ansible-kubernetes.git
+    cp /etc/ansible/ansible-kubernetes/kubernetes-hosts /etc/ansible/hosts
 }
 
 main(){
@@ -50,4 +60,5 @@ main(){
         echo 退出吧...
         version=q
     fi
+    install_ansible_git
 }
