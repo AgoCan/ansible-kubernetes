@@ -5,12 +5,18 @@
   yum: 
     name:
       - docker-ce
-
+      
 - name: 打开docker，并开机自起
   service:
     name: docker
     state: started
     enabled: yes
+
+- name: 安装nfs客户端
+  yum: 
+    name:
+      - nfs-utils
+    when: "groups['nfs']|length > 0"
 
 - name: 创建kube-node 相关目录
   file: name={{ item }} state=directory

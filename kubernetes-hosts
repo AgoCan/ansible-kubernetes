@@ -23,8 +23,7 @@
 # OVERWRITE_EXPORT 配置等于yes的时候，会把 /etc/exports 给覆盖掉成新
 # RSYNC_BACKUP 会使用rsync进行配分nfs的内容
 [nfs]
-#192.168.126.71 OVERWRITE_EXPORT="yes"
-#192.168.126.72 RSYNC_BACKUP=“yes”
+#192.168.126.71 NFS_SERVICE="yes" OVERWRITE_EXPORT="no" net_segment=“192.168.126.0/24” storageclass_dir="/data/nfs/storageclass"
 
 [all:vars]
 

@@ -25,6 +25,7 @@
     shell: "{{ bin_dir }}/kubectl get csr|grep 'Pending' | awk 'NR>0{print $1}'| xargs {{ bin_dir }}/kubectl certificate approve"
     delay: 2
     retries: 2
+    run_once: true
     ignore_errors: true
 
   - name: 轮询等待所有node加入

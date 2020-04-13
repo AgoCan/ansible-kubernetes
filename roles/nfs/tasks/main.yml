@@ -1,0 +1,23 @@
+- name: 安装nfs-utils
+  yum: 
+    name:
+      - nfs-utils
+
+- name: 创建export 相关目录
+  file: name={{ item }} state=directory
+  with_items:
+  - "{{ storageclass_dir }}"
+
+- name: 配置 nfs-utils 从节点
+  template:
+    src: exports.j2
+    dest: /etc/exports
+  when: "NFS_SERVICE == 'yes' and OVERWRITE_EXPORT='yes' "
+  tags: nfs_restart
+
+- name: 打开docker，并开机自起
+  service:
+    name: nfs
+    state: started
+    enabled: yes
+    when: "NFS_SERVICE == 'yes'"
