@@ -27,7 +27,7 @@ download_binary(){
     mkdir -p $BIN_DIR && \
     docker pull $BINARY_IMAGE$1 && \
     docker run -itd --name k8s_binary_image $BINARY_IMAGE$1 sh && \
-    docker cp k8s_binary_image:/hank-kubernetes $BIN_DIR && \
+    docker cp k8s_binary_image:/hank-kubernetes/bin $BIN_DIR && \
     docker rm -f k8s_binary_image || \
     exit 1
 }
@@ -42,15 +42,18 @@ install_ansible_git(){
 }
 
 main(){
-    install_docker
-    while [ ${version} != q ]
+    if [[ `systemctl status docker| grep running | wc -l` != "1" ]]
+    then
+        install_docker
+    fi
+    while [[ ${version} != q ]]
     do
     clear
     echo "################################"
     echo "选择安装版本"
     echo "1. kubernetes 17.4"
     echo "################################"
-    done
+    
     read -p "请选择: " version
     if [ -z ${version} ];then
         version=null
@@ -60,5 +63,6 @@ main(){
         echo 退出吧...
         version=q
     fi
+    done
     install_ansible_git
 }
