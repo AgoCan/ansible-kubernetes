@@ -1,0 +1,30 @@
+- name: 安装keepalived
+  yum: 
+    name:
+      - keepalived
+
+# 自动设置LB节点变量'LB_IF'
+- name: 注册变量 LB_INTERFACE_TMP
+  shell: "ip a|grep '{{ inventory_hostname }}/'|awk '{print $NF}'"
+  register: LB_INTERFACE_TMP
+  tags: restart_lb
+
+- name: 设置变量 LB_INTERFACE
+  set_fact: LB_INTERFACE={{ LB_INTERFACE_TMP.stdout }}
+  tags: restart_lb
+
+- name: 配置 keepalived 主节点
+  templates: src=keepalived.master.conf.j2 dest=/etc/keepalived/keepalived.conf
+  when: "{{ inventory_hostname }}" == "{{ groups['k8s_master'][0] }}"
+  tags: restart_lb
+
+- name: 配置 keepalived 从节点
+  templates: src=keepalived.backup.conf.j2 dest=/etc/keepalived/keepalived.conf
+  when: "{{ inventory_hostname }}" != "{{ groups['k8s_master'][0] }}"
+  tags: restart_lb
+
+- name: 启动keepalived，并设置开机自起
+  service:
+    name: keepalived
+    state: started
+    enabled: yes

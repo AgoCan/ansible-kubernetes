@@ -9,9 +9,14 @@
 - hosts: etcd
   roles:
     - etcd
+
+# 安装master
 - hosts: k8s_master
   roles:
     - k8s_master
+    {% if master_vip_choice == 'yes' %}
+    - keepalived
+    {% endif %}
 
 - hosts: k8s_node
   roles:
@@ -37,3 +42,6 @@
 - hosts: k8s_master
   roles:
     - plugins
+  tasks: 
+  - name: copy helm3 命令
+    copy: src={{ local_bin_dir }}/helm dest={{ bin_dir }}/helm mode=0755

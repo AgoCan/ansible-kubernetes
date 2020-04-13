@@ -1,0 +1,39 @@
+vrrp_instance V-KUBE-APISERVER {
+    # 指定 keepalived 的角色，MASTER 表示此主机是主服务器，BACKUP 表示此主机是备用服务器
+    state MASTER
+
+    # 指定网卡
+    interface {{ LB_INTERFACE }}
+
+    # 虚拟路由标识，这个标识是一个数字，同一个vrrp实例使用唯一的标识。
+    # 即同一vrrp_instance下，MASTER和BACKUP必须是一致的
+    virtual_router_id {{ ROUTER_ID }}
+
+    # 定义优先级，数字越大，优先级越高（0-255）。
+    # 在同一个vrrp_instance下，MASTER 的优先级必须大于 BACKUP 的优先级
+    priority 150
+
+    unicast_src_ip {{ inventory_hostname }}
+    unicast_peer {
+    {% for h in groups['k8s_master'] %}{% if h != inventory_hostname %}
+        {{ h }}
+    {% endif %}{% endfor %}
+    }
+
+    # 设定 MASTER 与 BACKUP 负载均衡器之间同步检查的时间间隔，单位是秒
+    advert_int 1
+
+    # 设置验证类型和密码
+    authentication {
+        #设置验证类型，主要有PASS和AH两种
+        auth_type PASS
+        #设置验证密码，在同一个vrrp_instance下，MASTER与BACKUP必须使用相同的密码才能正常通信
+        auth_pass {{ AUTH_PASS }}
+    }
+
+    #设置虚拟IP地址，可以设置多个虚拟IP地址，每行一个
+    virtual_ipaddress {
+        # 虚拟 IP
+        {{ master_vip }}
+      }
+}
