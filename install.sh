@@ -66,3 +66,4 @@ main(){
     done
     install_ansible_git
 }
+main

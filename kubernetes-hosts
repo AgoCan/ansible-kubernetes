@@ -20,6 +20,12 @@
 192.168.126.72
 192.168.126.73
 
+# OVERWRITE_EXPORT 配置等于yes的时候，会把 /etc/exports 给覆盖掉成新
+# RSYNC_BACKUP 会使用rsync进行配分nfs的内容
+[nfs]
+#192.168.126.71 OVERWRITE_EXPORT="yes"
+#192.168.126.72 RSYNC_BACKUP=“yes”
+
 [all:vars]
 
 # 直接在这里判断是否有vip, if 语法有误，暂无找到错误点在哪
