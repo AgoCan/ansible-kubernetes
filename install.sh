@@ -3,7 +3,7 @@
 # 镜像请加上冒号
 BINARY_IMAGE="hank997/kubernetes-deploy:"
 
-BIN_DIR="/etc/ansible/hank-kubernetes/bin"
+CODE_DIR="/etc/ansible/hank-kubernetes"
 
 install_docker(){
     wget -O /etc/yum.repos.d/docker-ce.repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
@@ -24,10 +24,10 @@ install_docker(){
 }
 
 download_binary(){
-    mkdir -p $BIN_DIR && \
+    mkdir -p $CODE_DIR && \
     docker pull $BINARY_IMAGE$1 && \
     docker run -itd --name k8s_binary_image $BINARY_IMAGE$1 sh && \
-    docker cp k8s_binary_image:/hank-kubernetes/bin $BIN_DIR && \
+    docker cp k8s_binary_image:/hank-kubernetes/bin/ $CODE_DIR && \
     docker rm -f k8s_binary_image || \
     exit 1
 }
@@ -38,7 +38,7 @@ install_ansible_git(){
     yum install ansible-2.9.6-1.el7 git -y
     cd /etc/ansible/
     git clone https://github.com/AgoCan/ansible-kubernetes.git
-    cp /etc/ansible/ansible-kubernetes/kubernetes-hosts /etc/ansible/hosts
+    #cp /etc/ansible/ansible-kubernetes/kubernetes-hosts /etc/ansible/hosts
 }
 
 main(){
