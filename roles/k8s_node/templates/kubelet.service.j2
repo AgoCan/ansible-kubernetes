@@ -24,5 +24,8 @@ ExecStart={{ bin_dir }}/kubelet  \
     --logtostderr=false   \
     --log-dir=/var/log/kubernetes   \
     --feature-gates=DevicePlugins=true
-Restart=on-failure
+Restart=always
 RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
