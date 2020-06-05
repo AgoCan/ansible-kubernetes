@@ -35,7 +35,7 @@ download_binary(){
 install_ansible_git(){
     yum install epel-release -y
     # 安装ansible
-    yum install ansible-2.9.6-1.el7 git -y
+    yum install ansible git -y
     cd /etc/ansible/
     git clone https://github.com/AgoCan/ansible-kubernetes.git
     #cp /etc/ansible/ansible-kubernetes/kubernetes-hosts /etc/ansible/hosts
@@ -52,6 +52,7 @@ main(){
     echo "################################"
     echo "选择安装版本"
     echo "1. kubernetes 17.4"
+    echo "任意键退出"
     echo "################################"
     
     read -p "请选择: " version
