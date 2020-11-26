@@ -114,3 +114,24 @@
 
 - name: 设置系统 ulimits
   copy: src=hank-ulimits.conf dest=/etc/systemd/system.conf.d/hank-ulimits.conf
+  
+- name: 安装kernel
+  rpm_key:
+    state: present
+    key: https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+- name: install elrepo7
+  yum:
+    name: https://www.elrepo.org/elrepo-release-7.el7.elrepo.noarch.rpm
+    state: present
+- name: install kernel-lt
+  yum:
+    name: kernel-lt
+    enablerepo: elrepo-kernel
+    state: present
+- name: grub2-set-default
+  command: grub2-set-default 0
+- name: grub2-mkconfig
+  command: grub2-mkconfig -o /boot/grub2/grub.cfg
+- name: 重启服务器，并等待10分钟
+  reboot:
+    connect_timeout: 600

@@ -1,0 +1,51 @@
+- name: pull nvidia 驱动
+  shell: "mkdir -p /usr/local/bin && \
+          docker pull {{ nvidia_image }}:{{ nvidia_version }} && \
+          docker run -itd --name nvidia_binary {{ nvidia_image }}:{{ nvidia_version }}  sh && \
+          docker cp nvidia_binary:NVIDIA-Linux-x86_64-{{ nvidia_version }}.run /usr/local/bin && \
+          docker rm -f nvidia_binary"
+
+# - name: 安装依赖
+#   yum:
+#     name: 
+#     - gcc
+#     - kernel-devel
+#     - kernel
+
+- name: 检查是否关闭了 nouveau
+  shell: "[[ `lsmod | grep nouveau | wc -l` > 0 ]] && echo succeeded  || echo failed"
+  register: nouveau_check
+
+- name: 关闭集显
+  shell: "sed -i 's@blacklist nvidiafb@#blacklist nvidiafb@g' /lib/modprobe.d/dist-blacklist.conf &&\
+  echo blacklist nouveau >> /lib/modprobe.d/dist-blacklist.conf && \
+  echo options nouveau modeset=0 >> /lib/modprobe.d/dist-blacklist.conf && \
+  mv /boot/initramfs-$(uname -r).img /boot/initramfs-$(uname -r).img.bak && \
+  /usr/sbin/dracut /boot/initramfs-$(uname -r).img $(uname -r) "
+  when: nouveau_check.stdout == 'succeeded'
+
+- name: 重启服务器，并等待10分钟
+  reboot:
+    connect_timeout: 600
+  when: nouveau_check.stdout == 'succeeded'
+
+- name: "安装驱动"
+  shell: "init 3 && \
+  /usr/local/bin/NVIDIA-Linux-x86_64-{{ nvidia_version }}.run -s --no-opengl-files && \
+  init 5"
+
+- name: 下载nvidia-docker repo
+  copy: 
+    src: nvidia-docker.repo
+    dest: /etc/yum.repos.d/nvidia-docker.repo
+
+- name: 安装nvidia-docker2
+  yum:
+    name:
+    - nvidia-container-toolkit
+    - nvidia-docker2
+
+- name:
+  template: 
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json

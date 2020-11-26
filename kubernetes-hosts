@@ -53,3 +53,7 @@ coredns_ip="10.96.0.2"
 
 dashboard_port="30001"
 
+# 最后加上版本号，用冒号链接，
+nvidia_image="hank997/nvidia-binary"
+nvidia_version="450.51.06"
+harbor_registry="harbor.example.com"
