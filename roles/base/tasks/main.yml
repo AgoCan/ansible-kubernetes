@@ -129,6 +129,7 @@
   copy: src=elrepo-release-7.el7.elrepo.noarch.rpm dest=/usr/local/src/elrepo-release-7.el7.elrepo.noarch.rpm
 - name: install elrepo7
   shell: "yum install /usr/local/src/elrepo-release-7.el7.elrepo.noarch.rpm"
+  ignore_errors: true
 - name: install kernel-lt
   yum:
     name: kernel-lt
