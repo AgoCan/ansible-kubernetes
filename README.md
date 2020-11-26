@@ -23,7 +23,7 @@ done
 #yum update
 yum install epel-release -y
 # 安装ansible
-yum install ansible-2.9.6-1.el7 git -y
+yum install ansible git -y
 ```
 
 3. 配置ansible的配置文件
