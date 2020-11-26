@@ -117,11 +117,13 @@
 
 - name: 设置系统 ulimits
   copy: src=hank-ulimits.conf dest=/etc/systemd/system.conf.d/hank-ulimits.conf
-  
-- name: 安装kernel
+
+- name:  copy rpm key
+  copy: src=RPM-GPG-KEY-elrepo.org dest=/usr/local/src/RPM-GPG-KEY-elrepo.org
+- name: 加载key
   rpm_key:
     state: present
-    key: https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+    key: /usr/local/src/RPM-GPG-KEY-elrepo.org
   ignore_errors: true
 - name:  copy elrepo7
   copy: src=elrepo-release-7.el7.elrepo.noarch.rpm dest=/usr/local/src/elrepo-release-7.el7.elrepo.noarch.rpm
