@@ -90,7 +90,7 @@
 - name: 增加内核模块开机加载配置
   copy: src=ipvs.modules dest=/etc/sysconfig/modules/ipvs.modules mode=0755
 
-- name: 加载
+- name: 加载ipvs
   shell: bash /etc/sysconfig/modules/ipvs.modules
   
 - name: 关闭防火墙
@@ -128,11 +128,16 @@
 - name:  copy elrepo7
   copy: src=elrepo-release-7.el7.elrepo.noarch.rpm dest=/usr/local/src/elrepo-release-7.el7.elrepo.noarch.rpm
 - name: install elrepo7
-  shell: "yum install /usr/local/src/elrepo-release-7.el7.elrepo.noarch.rpm"
+  yum:
+    name:
+      - /usr/local/src/elrepo-release-7.el7.elrepo.noarch.rpm
+    state: present
   ignore_errors: true
 - name: install kernel-lt
   yum:
-    name: kernel-lt
+    name: 
+      - kernel-lt
+      - kernel-lt-devel
     enablerepo: elrepo-kernel
     state: present
   ignore_errors: true
