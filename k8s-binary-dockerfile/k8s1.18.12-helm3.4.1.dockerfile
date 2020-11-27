@@ -1,5 +1,5 @@
 FROM busybox
-ENV K8S_VERSION=1.18.12
+ENV K8S_VERSION=v1.18.12
 ENV HELM_VERSION=v3.4.1
 ENV BIN_DIR=/hank-kubernetes/bin/
 WORKDIR /usr/local/src
