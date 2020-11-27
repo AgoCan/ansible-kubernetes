@@ -52,6 +52,8 @@ main(){
     echo "################################"
     echo "选择安装版本"
     echo "1. kubernetes 17.4"
+    echo "2. kubernetes 18.12"
+    echo "2. kubernetes 19.4"
     echo "任意键退出"
     echo "################################"
     
@@ -60,6 +62,10 @@ main(){
         version=null
     elif [ ${version} = 1 ];then
         download_binary 17.4
+    elif [ ${version} = 2 ];then
+        download_binary 18.12
+    elif [ ${version} = 3 ];then
+        download_binary 19.4
     else
         echo 退出吧...
         version=q
