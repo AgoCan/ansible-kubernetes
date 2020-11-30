@@ -40,7 +40,9 @@
     - bootstrap-token.csv
     - kube-proxy.pem
     - kube-proxy-key.pem
-#
+- name: 删除kubelet自动生成的证书
+  shell: "rm -rf {{ ca_dir }}/kubelet*"
+
 - name: 生成 bootstrap.kubeconfig 文件
   shell: "cd {{ kubernetes_config_dir }} && \
   {{ bin_dir }}/kubectl config set-cluster kubernetes \
