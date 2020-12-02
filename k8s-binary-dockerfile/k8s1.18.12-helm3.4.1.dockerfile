@@ -1,7 +1,7 @@
 FROM centos:7.6.1810
 ENV K8S_VERSION=v1.19.4
 ENV HELM_VERSION=v3.4.1
-ENV ETCD_VERSION=v3.4.14
+ENV ETCD_VERSION=v3.2.28
 ENV BIN_DIR=/hank-kubernetes/bin/
 WORKDIR /usr/local/src
 RUN mkdir -p ${BIN_DIR} && \
