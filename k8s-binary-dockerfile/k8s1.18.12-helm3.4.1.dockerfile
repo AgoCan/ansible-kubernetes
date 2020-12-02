@@ -1,10 +1,14 @@
 FROM centos:7.6.1810
 ENV K8S_VERSION=v1.19.4
 ENV HELM_VERSION=v3.4.1
+ENV ETCD_VERSION=v3.4.14
 ENV BIN_DIR=/hank-kubernetes/bin/
 WORKDIR /usr/local/src
 RUN mkdir -p ${BIN_DIR} && \
     yum install wget -y && \
+    wget https://github.com/etcd-io/etcd/releases/download/${ETCD_VERSION}/etcd-${ETCD_VERSION}-linux-amd64.tar.gz && \
+    tar xf etcd-${ETCD_VERSION}-linux-amd64.tar.gz && \
+    mv etcd-${ETCD_VERSION}-linux-amd64/etcd* /usr/local/bin && \
     wget https://dl.k8s.io/${K8S_VERSION}/kubernetes-client-linux-amd64.tar.gz && \
     wget https://dl.k8s.io/${K8S_VERSION}/kubernetes-server-linux-amd64.tar.gz  && \
     wget https://dl.k8s.io/${K8S_VERSION}/kubernetes-node-linux-amd64.tar.gz   && \
