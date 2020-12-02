@@ -12,7 +12,7 @@
   template:
     src: exports.j2
     dest: /etc/exports
-  when: "NFS_SERVICE == 'yes' and OVERWRITE_EXPORT='yes' "
+  when: "NFS_SERVICE == 'yes' and OVERWRITE_EXPORT == 'yes' "
   tags: nfs_restart
 
 - name: 打开docker，并开机自起
