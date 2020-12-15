@@ -23,7 +23,9 @@ ExecStart={{ bin_dir }}/kubelet  \
     --v=2   \
     --logtostderr=false   \
     --log-dir=/var/log/kubernetes   \
-    --feature-gates=DevicePlugins=true
+    --feature-gates=DevicePlugins=true \
+    --container-runtime=remote \
+    --container-runtime-endpoint=unix:///run/containerd/containerd.sock
 Restart=always
 RestartSec=5
 

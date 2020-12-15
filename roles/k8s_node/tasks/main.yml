@@ -1,14 +1,14 @@
 - name: 分发docker 阿里云源
   copy: src=docker-ce.repo dest=/etc/yum.repos.d/docker-ce.repo
 
-- name: 安装docker-ce
+- name: 安装containerd.io
   yum: 
     name:
-      - docker-ce
+      - containerd.io
       
 - name: 打开docker，并开机自起
   service:
-    name: docker
+    name: containerd
     state: started
     enabled: yes
 
